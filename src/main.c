@@ -7,18 +7,19 @@
 #include <errno.h>
 #include <math.h>
 
+
+#include "../include/glad/glad.h"
+
 #define GLFW_INCLUDE_GLEXT
 #include <GLFW/glfw3.h>
 
 #define DEFAULT_SCREEN_WIDTH 1600
 #define DEFAULT_SCREEN_HEIGHT 900
 
-#include "gloader.c"
-
 int main(void) {
     
     if (!glfwInit()) {
-        fprintf(stderr, "ERROR: could not initilize GLFW\n");
+        fprintf(stderr, "ERROR: could not initialize GLFW\n");
         exit(1);
     }
 
@@ -39,6 +40,21 @@ int main(void) {
         exit(1);
     }
     glfwMakeContextCurrent(window);
-    printf("Hello World!\n");
+
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        fprintf(stderr, "ERROR: could not initialize GLAD\n");
+        exit(1);
+    }
+    
+    glViewport(0, 0 , DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
+
+
+    while(!glfwWindowShouldClose(window))
+    {
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+    
+    glfwTerminate();
     return 0;
 }

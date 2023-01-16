@@ -16,6 +16,16 @@
 #define DEFAULT_SCREEN_WIDTH 1600
 #define DEFAULT_SCREEN_HEIGHT 900
 
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+  glViewport(0, 0, width, height);
+}
+
+void processInput(GLFWwindow* window) {
+  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    glfwSetWindowShouldClose(window, true);
+}
+
 int main(void) {
     
     if (!glfwInit()) {
@@ -45,14 +55,21 @@ int main(void) {
         fprintf(stderr, "ERROR: could not initialize GLAD\n");
         exit(1);
     }
-    
+    printf("Opengl used in this platform (%s): \n", glGetString(GL_VERSION));
     glViewport(0, 0 , DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
 
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    while(!glfwWindowShouldClose(window)) {
+      // input commands
+        processInput(window);
 
-    while(!glfwWindowShouldClose(window))
-    {
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+	// Rendering commands here
+	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+	
+	// CHeck and call events and swap the buffers
+	glfwPollEvents();
+	glfwSwapBuffers(window);
     }
     
     glfwTerminate();

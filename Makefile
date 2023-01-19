@@ -1,7 +1,7 @@
 CC = cc
 LIBS=-lglfw -lGL -lm -lglad
 
-all: main
+all: build/bin/main
 
 build/bin/main: src/main.c
 	@mkdir -p "$(@D)"

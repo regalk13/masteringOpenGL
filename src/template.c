@@ -8,7 +8,7 @@
 #include <math.h>
 
 
-#include "../include/glad/glad.h"
+#include "glad.c"
 
 #define GLFW_INCLUDE_GLEXT
 #include <GLFW/glfw3.h>

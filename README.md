@@ -1,2 +1,3 @@
 # the-fractal
-fractal in C
+
+OpenGL rendering stuff, like fractals

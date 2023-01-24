@@ -24,7 +24,7 @@ const char *vertexShaderSource = "#version 330 core\n"
     "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
     "}\0";
 
-const char *fragmentShaderSource = "#version 430 core\n"
+const char *fragmentShaderSource = "#version 330 core\n"
   "out vec4 FragColor;\n" 
   "void main()\n"
   "{\n"
@@ -142,18 +142,18 @@ int main(void) {
       // input commands
         processInput(window);
 
-	// Rendering commands here
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+        // Rendering commands here
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
 
-	glUseProgram(shaderProgram);
-	glBindVertexArray(VAO);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
-	
-	// CHeck and call events and swap the buffers
-	glfwSwapBuffers(window);
-	glfwPollEvents();
-	
+        glUseProgram(shaderProgram);
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        // CHeck and call events and swap the buffers
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+
     }
 
     glDeleteVertexArrays(1, &VAO);

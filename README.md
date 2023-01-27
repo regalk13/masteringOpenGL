@@ -1,3 +1,3 @@
-# the-fractal
+# Mastering OpenGL
 
-OpenGL rendering stuff, like fractals
+OpenGL rendering stuff

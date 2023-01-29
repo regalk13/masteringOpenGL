@@ -18,5 +18,10 @@ rectangle: src/rectangle/main.c
 	@echo Compiling "$<"
 	@$(CC) -O2 src/rectangle/main.c -o build/bin/rectangle -Llib $(LIBS)
 
+firste: src/two-triangles-exercise1/main.c 
+	@mkdir -p build/bin
+	@echo Compiling "$<"
+	@$(CC) -O2 src/two-triangles-exercise1/main.c -o build/bin/firste -Llib $(LIBS)
+
 clear:
 	@rm -rf build

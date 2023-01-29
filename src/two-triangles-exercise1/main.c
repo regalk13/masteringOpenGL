@@ -37,6 +37,7 @@ const char *fragmentShaderSource2 = "#version 330 core\n"
   "{\n"
   "   FragColor = vec4(1.0f, 1.0f, 0.0f, 1.0f);\n"
   "}\0";
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
   glViewport(0, 0, width, height);
 }
@@ -46,6 +47,7 @@ void processInput(GLFWwindow* window) {
     glfwSetWindowShouldClose(window, true);
 }
 /*
+// Rendering two triangles with the same VAO and VBO using the same vertices array
 int main(void) { 
     if (!glfwInit()) {
         fprintf(stderr, "ERROR: could not initialize GLFW\n");
@@ -175,6 +177,7 @@ int main(void) {
 }*/
 
 /*
+ // Rendering two triangles using two different VAO and VBO
   int main(void) { 
     if (!glfwInit()) {
         fprintf(stderr, "ERROR: could not initialize GLFW\n");
@@ -331,7 +334,8 @@ int main(void) {
     return 0;
 }
 */
-
+ 
+// Rendering two triangles using two different VAO and VBO and one use another fragment shader (yellow color)
 int main(void) { 
     if (!glfwInit()) {
         fprintf(stderr, "ERROR: could not initialize GLFW\n");

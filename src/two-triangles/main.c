@@ -21,7 +21,7 @@ const char *vertexShaderSource = "#version 330 core\n"
     "layout (location = 0) in vec3 aPos;\n"
     "void main()\n"
     "{\n"
-    "   gl_Position = vec4(aPos.y, aPos.x, aPos.z, 1.0);\n"
+    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
     "}\0";
 
 const char *fragmentShaderSource = "#version 330 core\n"
@@ -119,9 +119,13 @@ int main(void) {
     unsigned int VAO, VBO;
 
     float vertices[] = {
-    -0.5f, -0.5f, 0.0f,
-     0.5f, -0.5f, 0.0f,
-     0.0f,  0.5f, 0.0f
+        -0.9f, -0.5f, 0.0f,
+        -0.0f, -0.5f, 0.0f,
+        -0.45f,  0.5f, 0.0f,
+
+        0.5f, -0.5f, 0.0f,
+        0.9f, -0.5f, 0.0f,
+        0.45f,  0.5f, 0.0f
     }; 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -148,8 +152,8 @@ int main(void) {
 
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        
         // CHeck and call events and swap the buffers
         glfwSwapBuffers(window);
         glfwPollEvents();

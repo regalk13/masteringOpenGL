@@ -18,7 +18,5 @@ rectangle: src/rectangle/main.c
 	@echo Compiling "$<"
 	@$(CC) -O2 src/rectangle/main.c -o build/bin/rectangle -Llib $(LIBS)
 
-
-
 clear:
 	@rm -rf build

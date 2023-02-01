@@ -113,7 +113,7 @@ int main(void) {
 
     if (!success) {
       glGetShaderInfoLog(shaderProgram, 512, NULL, infoLog); 
-      fprintf(stderr, "ERROR: shader program link failed\n");
+      fprintf(stderr, "ERROR: shader program link failed: %s\n", infoLog);
     }
 
     // Delete shaders don't needed the program now have the memory itself
@@ -148,7 +148,7 @@ int main(void) {
     glBindVertexArray(0);
     
     while(!glfwWindowShouldClose(window)) {
-      // input commands
+        // input commands
         processInput(window);
 
         // Rendering commands here
@@ -159,7 +159,7 @@ int main(void) {
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
-        // CHeck and call events and swap the buffers
+        // Check and call events and swap the buffers
         glfwSwapBuffers(window);
         glfwPollEvents();
 

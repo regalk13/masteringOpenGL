@@ -88,7 +88,7 @@ int main(void) {
 
     if (!success) {
        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-       fprintf(stderr, "ERROR: shader vertex compilation failed: %c\n", infoLog);
+       fprintf(stderr, "ERROR: shader vertex compilation failed: %s\n", infoLog);
      }
     
     // Fragment Shaders
@@ -99,7 +99,7 @@ int main(void) {
 
     if (!success) {
       glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog); 
-      fprintf(stderr, "ERROR: fragment shader compilation failed: %c\n", infoLog);
+      fprintf(stderr, "ERROR: fragment shader compilation failed: %s\n", infoLog);
     }
      
     // Link shaders, shader program
@@ -142,7 +142,7 @@ int main(void) {
     glBindVertexArray(0);
     
     while(!glfwWindowShouldClose(window)) {
-      // input commands
+        // input commands
         processInput(window);
 
         // Rendering commands here
@@ -153,7 +153,7 @@ int main(void) {
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
-        // CHeck and call events and swap the buffers
+        // Check and call events and swap the buffers
         glfwSwapBuffers(window);
         glfwPollEvents();
 

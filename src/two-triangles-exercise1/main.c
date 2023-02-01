@@ -61,7 +61,7 @@ int main(void) {
     GLFWwindow * const window = glfwCreateWindow(
             DEFAULT_SCREEN_WIDTH, 
             DEFAULT_SCREEN_HEIGHT, 
-            "Fractal", 
+            "Triangle", 
             NULL, 
             NULL);
     
@@ -93,7 +93,7 @@ int main(void) {
 
     if (!success) {
        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-       fprintf(stderr, "ERROR: shader vertex compilation failed: %c\n", infoLog);
+       fprintf(stderr, "ERROR: shader vertex compilation failed: %s\n", infoLog);
      }
     
     // Fragment Shaders
@@ -104,7 +104,7 @@ int main(void) {
 
     if (!success) {
       glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog); 
-      fprintf(stderr, "ERROR: fragment shader compilation failed: %c\n", infoLog);
+      fprintf(stderr, "ERROR: fragment shader compilation failed: %s\n", infoLog);
     }
      
     // Link shaders, shader program
@@ -151,7 +151,7 @@ int main(void) {
     glBindVertexArray(0);
     
     while(!glfwWindowShouldClose(window)) {
-      // input commands
+        // input commands 
         processInput(window);
 
         // Rendering commands here
@@ -162,7 +162,7 @@ int main(void) {
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         
-        // CHeck and call events and swap the buffers
+        // Check and call events and swap the buffers
         glfwSwapBuffers(window);
         glfwPollEvents();
 
@@ -223,7 +223,7 @@ int main(void) {
 
     if (!success) {
        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-       fprintf(stderr, "ERROR: shader vertex compilation failed: %c\n", infoLog);
+       fprintf(stderr, "ERROR: shader vertex compilation failed: %s\n", infoLog);
      }
     
     // Fragment Shaders
@@ -234,7 +234,7 @@ int main(void) {
 
     if (!success) {
       glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog); 
-      fprintf(stderr, "ERROR: fragment shader compilation failed: %c\n", infoLog);
+      fprintf(stderr, "ERROR: fragment shader compilation failed: %s\n", infoLog);
     }
      
     // Link shaders, shader program
@@ -300,7 +300,7 @@ int main(void) {
 
 
     while(!glfwWindowShouldClose(window)) {
-      // input commands
+        // input commands
         processInput(window);
 
         // Rendering commands here
@@ -316,7 +316,7 @@ int main(void) {
         glBindVertexArray(VAO1);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glBindVertexArray(0);
-        // CHeck and call events and swap the buffers
+        // Check and call events and swap the buffers
         glfwSwapBuffers(window);
         glfwPollEvents();
 
@@ -349,7 +349,7 @@ int main(void) {
     GLFWwindow * const window = glfwCreateWindow(
             DEFAULT_SCREEN_WIDTH, 
             DEFAULT_SCREEN_HEIGHT, 
-            "Fractal", 
+            "Triangles", 
             NULL, 
             NULL);
     
@@ -381,7 +381,7 @@ int main(void) {
 
     if (!success) {
        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-       fprintf(stderr, "ERROR: shader vertex compilation failed: %c\n", infoLog);
+       fprintf(stderr, "ERROR: shader vertex compilation failed: %s\n", infoLog);
      }
     
     // Fragment Shaders
@@ -392,7 +392,7 @@ int main(void) {
 
     if (!success) {
       glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog); 
-      fprintf(stderr, "ERROR: fragment shader compilation failed: %c\n", infoLog);
+      fprintf(stderr, "ERROR: fragment shader compilation failed: %s\n", infoLog);
     }
     // Fragment Shaders 2
     unsigned int fragmentShader2 = glCreateShader(GL_FRAGMENT_SHADER);
@@ -402,7 +402,7 @@ int main(void) {
 
     if (!success) {
       glGetShaderInfoLog(fragmentShader2, 512, NULL, infoLog); 
-      fprintf(stderr, "ERROR: fragment shader compilation failed: %c\n", infoLog);
+      fprintf(stderr, "ERROR: fragment shader compilation failed: %s\n", infoLog);
     }   
     // Link shaders, shader program
     unsigned int shaderProgram = glCreateProgram();
@@ -480,7 +480,7 @@ int main(void) {
 
 
     while(!glfwWindowShouldClose(window)) {
-      // input commands
+        // input commands
         processInput(window);
 
         // Rendering commands here
@@ -498,7 +498,7 @@ int main(void) {
         glBindVertexArray(VAO1);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glBindVertexArray(0);
-        // CHeck and call events and swap the buffers
+        // Check and call events and swap the buffers
         glfwSwapBuffers(window);
         glfwPollEvents();
 

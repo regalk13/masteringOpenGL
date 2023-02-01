@@ -88,7 +88,7 @@ int main(void) {
 
     if (!success) {
        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-       fprintf(stderr, "ERROR: shader vertex compilation failed: %c\n", infoLog);
+       fprintf(stderr, "ERROR: shader vertex compilation failed: %s\n", infoLog);
      }
     
     // Fragment Shaders
@@ -99,7 +99,7 @@ int main(void) {
 
     if (!success) {
       glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog); 
-      fprintf(stderr, "ERROR: fragment shader compilation failed: %c\n", infoLog);
+      fprintf(stderr, "ERROR: fragment shader compilation failed: %s\n", infoLog);
     }
      
     // Link shaders, shader program

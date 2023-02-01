@@ -19,19 +19,20 @@
 
 const char *vertexShaderSource = "#version 330 core\n"
     "layout (location = 0) in vec3 aPos;\n"
-    "out vec4 vertexColor;\n"
+    "layout (location = 1) in vec3 aColor;\n"
+    "out vec3 vertexColor;\n"
     "void main()\n"
     "{\n"
     "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "   vertexColor = vec4(0.5f, 0.0f, 0.0f, 1.0f);\n"
+    "   vertexColor = aColor;\n"
     "}\0";
 
 const char *fragmentShaderSource = "#version 330 core\n"
   "out vec4 FragColor;\n" 
-  "in vec4 vertexColor;\n"
+  "in vec3 vertexColor;\n"
   "void main()\n"
   "{\n"
-  "   FragColor = vertexColor;\n"
+  "   FragColor = vec4(vertexColor, 1.0f);\n"
   "}\0";
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -56,7 +57,7 @@ int main(void) {
     GLFWwindow * const window = glfwCreateWindow(
             DEFAULT_SCREEN_WIDTH, 
             DEFAULT_SCREEN_HEIGHT, 
-            "Fractal", 
+            "Color vertex", 
             NULL, 
             NULL);
     
@@ -88,7 +89,7 @@ int main(void) {
 
     if (!success) {
        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-       fprintf(stderr, "ERROR: shader vertex compilation failed: %c\n", infoLog);
+       fprintf(stderr, "ERROR: shader vertex compilation failed: %s\n", infoLog);
      }
     
     // Fragment Shaders
@@ -99,7 +100,7 @@ int main(void) {
 
     if (!success) {
       glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog); 
-      fprintf(stderr, "ERROR: fragment shader compilation failed: %c\n", infoLog);
+      fprintf(stderr, "ERROR: fragment shader compilation failed: %s\n", infoLog);
     }
      
     // Link shaders, shader program
@@ -122,9 +123,9 @@ int main(void) {
     unsigned int VAO, VBO;
 
     float vertices[] = {
-    -0.5f, -0.5f, 0.0f,
-     0.5f, -0.5f, 0.0f,
-     0.0f,  0.5f, 0.0f
+    -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+     0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+     0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
     }; 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -135,8 +136,13 @@ int main(void) {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
+ 
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float)));
+    glEnableVertexAttribArray(1);
+
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);

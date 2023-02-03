@@ -18,8 +18,7 @@
 
 
 
-char *slurp_file_into_malloced_cstr(const char *file_path)
-{
+char *slurp_file_into_malloced_cstr(const char *file_path) {
     FILE *f = NULL;
     char *buffer = NULL;
 
@@ -94,12 +93,14 @@ bool compile_shader_file(const char *file_path, GLenum shader_type, GLuint *shad
     return ok;
 }
 
-bool link_program(GLuint vert_shader, GLuint frag_shader, GLuint *program)
-{
+bool link_program(GLuint *shaders, size_t shaders_count,  GLuint *program) {
+    
     *program = glCreateProgram();
+    
+    for (size_t i = 0; i < shaders_count; ++i) {
+        glAttachShader(*program, shaders[i]);
+    }
 
-    glAttachShader(*program, vert_shader);
-    glAttachShader(*program, frag_shader);
     glLinkProgram(*program);
 
     GLint linked = 0;
@@ -111,22 +112,17 @@ bool link_program(GLuint vert_shader, GLuint frag_shader, GLuint *program)
         glGetProgramInfoLog(*program, sizeof(message), &message_size, message);
         fprintf(stderr, "Program Linking: %.*s\n", message_size, message);
     }
+    
 
-    glDeleteShader(vert_shader);
-    glDeleteShader(frag_shader);
+    // glDeleteShader(vert_shader);
+    // glDeleteShader(frag_shader);
 
     return program;
 }
 
-
-void attach_shaders_to_program(GLuint *shaders, size_t shaders_count, GLuint program) {
-
-}
-
 bool load_shader_program(const char *vertex_file_path,
                          const char *fragment_file_path,
-                         GLuint *program)
-{
+                         GLuint *program) {
     GLuint vert = 0;
     if (!compile_shader_file(vertex_file_path, GL_VERTEX_SHADER, &vert)) {
         return false;
@@ -137,7 +133,8 @@ bool load_shader_program(const char *vertex_file_path,
         return false;
     }
 
-    if (!link_program(vert, frag, program)) {
+    GLuint shaders[2] = {vert, frag};
+    if (!link_program(shaders, 2, program)) {
         return false;
     }
 

@@ -245,4 +245,11 @@ int main(void) {
     
     glfwTerminate();
     return 0;
+
+    /*
+        Why the left corner is black? 
+        
+        Well we're exporting the position of the vertex as colors of the fragment, and the values of this position are (-0.5f, -0.5f, 0.0f)
+        this is wrapped to 0.0f all negatives and this result in a black color in the vec4 color.
+    */
 }

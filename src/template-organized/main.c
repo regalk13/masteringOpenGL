@@ -17,23 +17,133 @@
 #define DEFAULT_SCREEN_HEIGHT 900
 
 
-const char *vertexShaderSource = "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "layout (location = 1) in vec3 aColor;\n"
-    "out vec3 vertexColor;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "   vertexColor = aColor;\n"
-    "}\0";
 
-const char *fragmentShaderSource = "#version 330 core\n"
-  "out vec4 FragColor;\n" 
-  "in vec3 vertexColor;\n"
-  "void main()\n"
-  "{\n"
-  "   FragColor = vec4(vertexColor, 1.0f);\n"
-  "}\0";
+char *slurp_file_into_malloced_cstr(const char *file_path)
+{
+    FILE *f = NULL;
+    char *buffer = NULL;
+
+    f = fopen(file_path, "r");
+    if (f == NULL) goto fail;
+    if (fseek(f, 0, SEEK_END) < 0) goto fail;
+
+    long size = ftell(f);
+    if (size < 0) goto fail;
+
+    buffer = malloc(size + 1);
+    if (buffer == NULL) goto fail;
+
+    if (fseek(f, 0, SEEK_SET) < 0) goto fail;
+
+    fread(buffer, 1, size, f);
+    if (ferror(f)) goto fail;
+
+    buffer[size] = '\0';
+
+    if (f) {
+        fclose(f);
+        errno = 0;
+    }
+    return buffer;
+    fail:
+    if (f) {
+        int saved_errno = errno;
+        fclose(f);
+        errno = saved_errno;
+    }
+    if (buffer) {
+        free(buffer);
+    }
+    return NULL;
+}
+
+
+bool compile_shader_source(const GLchar *source, GLenum shader_type, GLuint *shader) {
+    *shader = glCreateShader(shader_type);
+    glShaderSource(*shader, 1, &source, NULL);
+    glCompileShader(*shader);
+
+    GLint compiled = 0;
+    glGetShaderiv(*shader, GL_COMPILE_STATUS, &compiled);
+    
+    if (!compiled) {
+        GLchar message[1024];
+        GLsizei message_size;
+        glGetShaderInfoLog(*shader, sizeof(message), &message_size, message);
+        fprintf(stderr, "ERROR: could not compile %c\n", shader_type);
+        fprintf(stderr, "%.*s\n", message_size, message);
+        return false;
+    }
+
+    return true;
+}
+
+
+bool compile_shader_file(const char *file_path, GLenum shader_type, GLuint *shader) {
+    char *source = slurp_file_into_malloced_cstr(file_path);
+    if (source == NULL) {
+        fprintf(stderr, "ERROR: failed to read file `%s`: %s\n", file_path, strerror(errno));
+        errno = 0;
+        return false;
+    }
+    bool ok = compile_shader_source(source, shader_type, shader);
+    if (!ok) {
+        fprintf(stderr, "ERROR: failed to compile `%s` shader file\n", file_path);
+    }
+    free(source);
+    return ok;
+}
+
+bool link_program(GLuint vert_shader, GLuint frag_shader, GLuint *program)
+{
+    *program = glCreateProgram();
+
+    glAttachShader(*program, vert_shader);
+    glAttachShader(*program, frag_shader);
+    glLinkProgram(*program);
+
+    GLint linked = 0;
+    glGetProgramiv(*program, GL_LINK_STATUS, &linked);
+    if (!linked) {
+        GLsizei message_size = 0;
+        GLchar message[1024];
+
+        glGetProgramInfoLog(*program, sizeof(message), &message_size, message);
+        fprintf(stderr, "Program Linking: %.*s\n", message_size, message);
+    }
+
+    glDeleteShader(vert_shader);
+    glDeleteShader(frag_shader);
+
+    return program;
+}
+
+
+void attach_shaders_to_program(GLuint *shaders, size_t shaders_count, GLuint program) {
+
+}
+
+bool load_shader_program(const char *vertex_file_path,
+                         const char *fragment_file_path,
+                         GLuint *program)
+{
+    GLuint vert = 0;
+    if (!compile_shader_file(vertex_file_path, GL_VERTEX_SHADER, &vert)) {
+        return false;
+    }
+
+    GLuint frag = 0;
+    if (!compile_shader_file(fragment_file_path, GL_FRAGMENT_SHADER, &frag)) {
+        return false;
+    }
+
+    if (!link_program(vert, frag, program)) {
+        return false;
+    }
+
+    return true;
+}
+
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
   glViewport(0, 0, width, height);
@@ -76,50 +186,17 @@ int main(void) {
     }
     printf("Opengl used in this platform (%s): \n", glGetString(GL_VERSION));
     glViewport(0, 0 , DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
-
-    // Vertex Shaders
-
-    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-
-    int success; 
-    char infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-
-    if (!success) {
-       glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-       fprintf(stderr, "ERROR: shader vertex compilation failed: %s\n", infoLog);
-     }
     
-    // Fragment Shaders
-    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    const char *vertex_file_path = "shaders/vertex.vert";
+    const char *fragment_file_path = "shaders/color.frag";
+    GLuint program;
 
-    if (!success) {
-      glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog); 
-      fprintf(stderr, "ERROR: fragment shader compilation failed: %s\n", infoLog);
+    if (!load_shader_program(vertex_file_path, fragment_file_path, &program)) {
+        exit(1);
     }
+
+    glUseProgram(program);
      
-    // Link shaders, shader program
-    unsigned int shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-
-    if (!success) {
-      glGetShaderInfoLog(shaderProgram, 512, NULL, infoLog); 
-      fprintf(stderr, "ERROR: shader program link failed: %s\n", infoLog);
-    }
-
-    // Delete shaders don't needed the program now have the memory itself
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-    
     unsigned int VAO, VBO;
 
     float vertices[] = {
@@ -155,7 +232,7 @@ int main(void) {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(shaderProgram);
+        glUseProgram(program);
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
@@ -167,7 +244,7 @@ int main(void) {
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    glDeleteProgram(shaderProgram);
+    glDeleteProgram(program);
     
     glfwTerminate();
     return 0;

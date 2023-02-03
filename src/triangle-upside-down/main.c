@@ -114,8 +114,10 @@ bool link_program(GLuint *shaders, size_t shaders_count,  GLuint *program) {
     }
     
 
-    // glDeleteShader(vert_shader);
-    // glDeleteShader(frag_shader);
+   // Clean the shaders from the memory
+    for (size_t i = 0; i < shaders_count; ++i) {
+        glDeleteShader(shaders[i]);
+    }
 
     return program;
 }

@@ -16,47 +16,60 @@
 #define DEFAULT_SCREEN_WIDTH 1600
 #define DEFAULT_SCREEN_HEIGHT 900
 
-
-
+// Function to read the shader file
 char *slurp_file_into_malloced_cstr(const char *file_path) {
+    // Defining variables
     FILE *f = NULL;
-    char *buffer = NULL;
-
+    char *buffer;
+    
+    // Opening the file with the function fopen
     f = fopen(file_path, "r");
+    // Checking in case of error
     if (f == NULL) goto fail;
     if (fseek(f, 0, SEEK_END) < 0) goto fail;
-
+    
+    // We get the size of the file in bytes and save it 
     long size = ftell(f);
+    // Check for empty files
     if (size < 0) goto fail;
 
+    // Set memory for the size of the file 
     buffer = malloc(size + 1);
+    // Check error 
     if (buffer == NULL) goto fail;
-
     if (fseek(f, 0, SEEK_SET) < 0) goto fail;
-
+    
+    // Reading and copying the file in the buffer 
     fread(buffer, 1, size, f);
+
     if (ferror(f)) goto fail;
-
+    
+    // Add \0 to the end of the buffer 
     buffer[size] = '\0';
-
+    
+    // Close the file     
     if (f) {
         fclose(f);
         errno = 0;
     }
+
+    // Return the buffer 
     return buffer;
+    
+    // Fail path
     fail:
-    if (f) {
-        int saved_errno = errno;
-        fclose(f);
-        errno = saved_errno;
-    }
-    if (buffer) {
-        free(buffer);
-    }
-    return NULL;
+        if (f) {
+            int saved_errno = errno;
+            fclose(f);
+            errno = saved_errno;
+        }
+        if (buffer) {
+            free(buffer);
+        }
+        return NULL;
 }
 
-
+// Compiling the shaders
 bool compile_shader_source(const GLchar *source, GLenum shader_type, GLuint *shader) {
     *shader = glCreateShader(shader_type);
     glShaderSource(*shader, 1, &source, NULL);
@@ -77,7 +90,7 @@ bool compile_shader_source(const GLchar *source, GLenum shader_type, GLuint *sha
     return true;
 }
 
-
+// Compile the shader by the file
 bool compile_shader_file(const char *file_path, GLenum shader_type, GLuint *shader) {
     char *source = slurp_file_into_malloced_cstr(file_path);
     if (source == NULL) {
@@ -93,6 +106,7 @@ bool compile_shader_file(const char *file_path, GLenum shader_type, GLuint *shad
     return ok;
 }
 
+// Link the program shader with the shaders specified
 bool link_program(GLuint *shaders, size_t shaders_count,  GLuint *program) {
     
     *program = glCreateProgram();
@@ -113,13 +127,15 @@ bool link_program(GLuint *shaders, size_t shaders_count,  GLuint *program) {
         fprintf(stderr, "Program Linking: %.*s\n", message_size, message);
     }
     
-
-    // glDeleteShader(vert_shader);
-    // glDeleteShader(frag_shader);
+    // Clean the shaders from the memory
+    for (size_t i = 0; i < shaders_count; ++i) {
+        glDeleteShader(shaders[i]);
+    }
 
     return program;
 }
 
+// Function called to create and sync the shader program
 bool load_shader_program(const char *vertex_file_path,
                          const char *fragment_file_path,
                          GLuint *program) {

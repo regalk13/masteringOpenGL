@@ -16,48 +16,60 @@
 #define DEFAULT_SCREEN_WIDTH 1600
 #define DEFAULT_SCREEN_HEIGHT 900
 
+
+void file_size(FILE *file, size_t *size) {
+    long saved = ftell(file);
+    if (saved < 0) return;
+    if (fseek(file, 0, SEEK_END) < 0) return;
+    long result = ftell(file);
+    if (result < 0) return;  
+    if (fseek(file, saved, SEEK_SET) < 0) return;
+    *size = (size_t) result;
+    return;
+}
+
 // Function to read the shader file
 char *slurp_file_into_malloced_cstr(const char *file_path) {
     // Defining variables
     FILE *f = NULL;
+    
     char *buffer;
     
-    // Opening the file with the function fopen
     f = fopen(file_path, "r");
-    // Checking in case of error
-    if (f == NULL) goto fail;
-    if (fseek(f, 0, SEEK_END) < 0) goto fail;
+
+
+    if (f == NULL) {
+        return NULL;
+    }
     
-    // We get the size of the file in bytes and save it 
-    long size = ftell(f);
+    size_t size; 
+    file_size(f, &size);
+     
     // Check for empty files
-    if (size < 0) goto fail;
-
-    // Set memory for the size of the file 
-    buffer = malloc(size + 1);
-    // Check error 
-    if (buffer == NULL) goto fail;
-    if (fseek(f, 0, SEEK_SET) < 0) goto fail;
-    
-    // Reading and copying the file in the buffer 
-    fread(buffer, 1, size, f);
-
-    if (ferror(f)) goto fail;
-    
-    // Add \0 to the end of the buffer 
-    buffer[size] = '\0';
-    
-    // Close the file     
-    if (f) {
-        fclose(f);
-        errno = 0;
+    if (size == 0) {
+       if (f) {
+            int saved_errno = errno;
+            fclose(f);
+            errno = saved_errno;
+        }
+        
+        return NULL;
     }
 
-    // Return the buffer 
-    return buffer;
+    if (fseek(f, 0, SEEK_END) < 0) { 
+       if (f) {
+            int saved_errno = errno;
+            fclose(f);
+            errno = saved_errno;
+        }
+        return NULL;
+    }
+   
+    // Set memory for the size of the file 
+    buffer = malloc(size + 1);
     
-    // Fail path
-    fail:
+    if (buffer == NULL) {
+
         if (f) {
             int saved_errno = errno;
             fclose(f);
@@ -67,7 +79,45 @@ char *slurp_file_into_malloced_cstr(const char *file_path) {
             free(buffer);
         }
         return NULL;
-}
+
+    }
+ 
+    if (fseek(f, 0, SEEK_SET) < 0) {     
+       if (f) {
+            int saved_errno = errno;
+            fclose(f);
+            errno = saved_errno;
+        }
+        if (buffer) {
+            free(buffer);
+        }
+        return NULL;
+    }
+   
+  
+    // Reading and copying the file in the buffer 
+    fread(buffer, 1, size, f);
+
+    if (ferror(f)) {
+        if (f) {
+            int saved_errno = errno;
+            fclose(f);
+            errno = saved_errno;
+        }
+        if (buffer) {
+            free(buffer);
+        }
+        return NULL;
+    }
+    
+    // Add \0 to the end of the buffer 
+    buffer[size] = '\0';
+    
+    fclose(f);
+
+    // Return the buffer 
+    return buffer;
+ }
 
 // Compiling the shaders
 bool compile_shader_source(const GLchar *source, GLenum shader_type, GLuint *shader) {

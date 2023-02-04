@@ -17,15 +17,17 @@
 #define DEFAULT_SCREEN_HEIGHT 900
 
 
-void file_size(FILE *file, size_t *size) {
+int file_size(FILE *file, size_t *size) {
     long saved = ftell(file);
-    if (saved < 0) return;
-    if (fseek(file, 0, SEEK_END) < 0) return;
+    if (saved < 0) return -1;
+   
+    if (fseek(file, 0, SEEK_END) < 0) return-1;
     long result = ftell(file);
-    if (result < 0) return;  
-    if (fseek(file, saved, SEEK_SET) < 0) return;
+    if (result < 0) return -1;  
+    if (fseek(file, saved, SEEK_SET) < 0) return -1;
+
     *size = (size_t) result;
-    return;
+    return 0;
 }
 
 // Function to read the shader file
@@ -47,21 +49,17 @@ char *slurp_file_into_malloced_cstr(const char *file_path) {
      
     // Check for empty files
     if (size == 0) {
-       if (f) {
-            int saved_errno = errno;
-            fclose(f);
-            errno = saved_errno;
-        }
-        
+        int saved_errno = errno;
+        fclose(f);
+        errno = saved_errno;
+
         return NULL;
     }
 
     if (fseek(f, 0, SEEK_END) < 0) { 
-       if (f) {
-            int saved_errno = errno;
-            fclose(f);
-            errno = saved_errno;
-        }
+        int saved_errno = errno;
+        fclose(f);
+        errno = saved_errno;
         return NULL;
     }
    
@@ -70,27 +68,19 @@ char *slurp_file_into_malloced_cstr(const char *file_path) {
     
     if (buffer == NULL) {
 
-        if (f) {
-            int saved_errno = errno;
-            fclose(f);
-            errno = saved_errno;
-        }
-        if (buffer) {
-            free(buffer);
-        }
+        int saved_errno = errno;
+        fclose(f);
+        errno = saved_errno;
+
         return NULL;
 
     }
  
     if (fseek(f, 0, SEEK_SET) < 0) {     
-       if (f) {
-            int saved_errno = errno;
-            fclose(f);
-            errno = saved_errno;
-        }
-        if (buffer) {
-            free(buffer);
-        }
+        int saved_errno = errno;
+        fclose(f);
+        errno = saved_errno;
+        free(buffer);
         return NULL;
     }
    
@@ -99,20 +89,15 @@ char *slurp_file_into_malloced_cstr(const char *file_path) {
     fread(buffer, 1, size, f);
 
     if (ferror(f)) {
-        if (f) {
-            int saved_errno = errno;
-            fclose(f);
-            errno = saved_errno;
-        }
-        if (buffer) {
-            free(buffer);
-        }
+        int saved_errno = errno;
+        fclose(f);
+        errno = saved_errno; 
+        free(buffer);
         return NULL;
     }
     
     // Add \0 to the end of the buffer 
-    buffer[size] = '\0';
-    
+    buffer[size] = '\0'; 
     fclose(f);
 
     // Return the buffer 

@@ -20,10 +20,10 @@
 int file_size(FILE *file, size_t *size) {
     long saved = ftell(file);
     if (saved < 0) return -1;
-   
+
     if (fseek(file, 0, SEEK_END) < 0) return-1;
     long result = ftell(file);
-    if (result < 0) return -1;  
+    if (result < 0) return -1;
     if (fseek(file, saved, SEEK_SET) < 0) return -1;
 
     *size = (size_t) result;
@@ -34,19 +34,19 @@ int file_size(FILE *file, size_t *size) {
 char *slurp_file_into_malloced_cstr(const char *file_path) {
     // Defining variables
     FILE *f = NULL;
-    
+
     char *buffer;
-    
+
     f = fopen(file_path, "r");
 
 
     if (f == NULL) {
         return NULL;
     }
-    
-    size_t size; 
+
+    size_t size;
     file_size(f, &size);
-     
+
     // Check for empty files
     if (size == 0) {
         int saved_errno = errno;
@@ -56,16 +56,16 @@ char *slurp_file_into_malloced_cstr(const char *file_path) {
         return NULL;
     }
 
-    if (fseek(f, 0, SEEK_END) < 0) { 
+    if (fseek(f, 0, SEEK_END) < 0) {
         int saved_errno = errno;
         fclose(f);
         errno = saved_errno;
         return NULL;
     }
-   
-    // Set memory for the size of the file 
+
+    // Set memory for the size of the file
     buffer = malloc(size + 1);
-    
+
     if (buffer == NULL) {
 
         int saved_errno = errno;
@@ -75,32 +75,31 @@ char *slurp_file_into_malloced_cstr(const char *file_path) {
         return NULL;
 
     }
- 
-    if (fseek(f, 0, SEEK_SET) < 0) {     
+
+    if (fseek(f, 0, SEEK_SET) < 0) {
         int saved_errno = errno;
         fclose(f);
         errno = saved_errno;
         free(buffer);
         return NULL;
     }
-   
-  
-    // Reading and copying the file in the buffer 
+
+    // Reading and copying the file in the buffer
     fread(buffer, 1, size, f);
 
     if (ferror(f)) {
         int saved_errno = errno;
         fclose(f);
-        errno = saved_errno; 
+        errno = saved_errno;
         free(buffer);
         return NULL;
     }
-    
-    // Add \0 to the end of the buffer 
-    buffer[size] = '\0'; 
+
+    // Add \0 to the end of the buffer
+    buffer[size] = '\0';
     fclose(f);
 
-    // Return the buffer 
+    // Return the buffer
     return buffer;
  }
 
@@ -112,7 +111,7 @@ bool compile_shader_source(const GLchar *source, GLenum shader_type, GLuint *sha
 
     GLint compiled = 0;
     glGetShaderiv(*shader, GL_COMPILE_STATUS, &compiled);
-    
+
     if (!compiled) {
         GLchar message[1024];
         GLsizei message_size;
@@ -143,9 +142,9 @@ bool compile_shader_file(const char *file_path, GLenum shader_type, GLuint *shad
 
 // Link the program shader with the shaders specified
 bool link_program(GLuint *shaders, size_t shaders_count,  GLuint *program) {
-    
+
     *program = glCreateProgram();
-    
+
     for (size_t i = 0; i < shaders_count; ++i) {
         glAttachShader(*program, shaders[i]);
     }
@@ -161,7 +160,7 @@ bool link_program(GLuint *shaders, size_t shaders_count,  GLuint *program) {
         glGetProgramInfoLog(*program, sizeof(message), &message_size, message);
         fprintf(stderr, "Program Linking: %.*s\n", message_size, message);
     }
-    
+
     // Clean the shaders from the memory
     for (size_t i = 0; i < shaders_count; ++i) {
         glDeleteShader(shaders[i]);
@@ -202,7 +201,7 @@ void processInput(GLFWwindow* window) {
     glfwSetWindowShouldClose(window, true);
 }
 
-int main(void) { 
+int main(void) {
     if (!glfwInit()) {
         fprintf(stderr, "ERROR: could not initialize GLFW\n");
         exit(1);
@@ -211,14 +210,14 @@ int main(void) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    
+
     GLFWwindow * const window = glfwCreateWindow(
-            DEFAULT_SCREEN_WIDTH, 
-            DEFAULT_SCREEN_HEIGHT, 
-            "Color vertex", 
-            NULL, 
+            DEFAULT_SCREEN_WIDTH,
+            DEFAULT_SCREEN_HEIGHT,
+            "Four triangles",
+            NULL,
             NULL);
-    
+
     if (window == NULL) {
         fprintf(stderr, "ERROR: the window could not be created");
         glfwTerminate();
@@ -234,7 +233,7 @@ int main(void) {
     }
     printf("Opengl used in this platform (%s): \n", glGetString(GL_VERSION));
     glViewport(0, 0 , DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
-    
+
     const char *vertex_file_path = "shaders/vertex.vert";
     const char *fragment_file_path = "shaders/color.frag";
     GLuint program;
@@ -244,7 +243,7 @@ int main(void) {
     }
 
     glUseProgram(program);
-     
+
     unsigned int VAO, VBO, VAO1, VBO1;
 
     float vertices[] = {
@@ -257,8 +256,8 @@ int main(void) {
     // (x, y) -> (-x, -y)
     float vertices2[] = {
       0.2f, -0.0f, 0.0f, 0.2f, 0.3f, 0.3f, // bottom left
-     -0.2f, -0.0f, 0.0f, 0.2f, 0.3f, 0.3f, //bottom right 
-     -0.0f,  -0.5f, 0.0f, 0.2f, 0.3f, 0.3f, // top 
+      -0.2f, -0.0f, 0.0f, 0.2f, 0.3f, 0.3f, //bottom right
+      -0.0f,  -0.5f, 0.0f, 0.2f, 0.3f, 0.3f, // top
     };
 
 
@@ -267,14 +266,14 @@ int main(void) {
 
     glBindVertexArray(VAO);
 
-    
+
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    
+
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
- 
+
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float)));
     glEnableVertexAttribArray(1);
 
@@ -289,14 +288,14 @@ int main(void) {
 
     glBindVertexArray(VAO1);
 
-    
+
     glBindBuffer(GL_ARRAY_BUFFER, VBO1);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW);
-    
+
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
- 
+
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float)));
     glEnableVertexAttribArray(1);
 
@@ -329,7 +328,7 @@ int main(void) {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteProgram(program);
-    
+
     glfwTerminate();
     return 0;
 }

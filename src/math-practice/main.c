@@ -244,12 +244,11 @@ int main(void) {
    
     // Translating a vector with the identity matrix
     mat4 trans = GLM_MAT4_IDENTITY_INIT; 
-    vec4 rt;
     vec4 vector =  {1.0f, 0.0f, 0.0f, 1.0f};
     
     glm_translate(trans, (vec3){1.0f, 1.0f, 0.0f});
-    glm_mat4_mulv(trans, vector, rt);
-    printf("Vector: %f\n", rt[0]);
+    glm_mat4_mulv(trans, vector, vector);
+    printf("Vector: %f\n", vector[0]);
 
 
     GLFWwindow * const window = glfwCreateWindow(

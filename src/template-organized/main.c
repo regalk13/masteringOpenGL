@@ -19,6 +19,7 @@
 #define DEFAULT_SCREEN_WIDTH 1600
 #define DEFAULT_SCREEN_HEIGHT 900
 
+#include <cglm/call.h>
 
 int file_size(FILE *file, size_t *size) {
     long saved = ftell(file);
@@ -299,7 +300,20 @@ int main(void) {
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+   
+    // Testing math library cglm
+   
+    // Translating a vector with the identity matrix
+    mat4 m = {
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    };
     
+
+    glm_translate(m, (vec3){1.0f, 0.0f, 0.0f});
+
     while(!glfwWindowShouldClose(window)) {
         // input commands
         processInput(window);

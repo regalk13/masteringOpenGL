@@ -300,20 +300,22 @@ int main(void) {
 
     float vertices[] = {
         // positions          // colors           // texture coords
-        0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-        0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
+        0.5f,  0.5f, 0.0f, 1.0f, 1.0f,   // top right
+        0.5f, -0.5f, 0.0f, 1.0f, 0.0f,   // bottom right
+        -0.5f, -0.5f, 0.0f,  0.0f, 0.0f,   // bottom left
+        -0.5f,  0.5f, 0.0f, 0.0f, 1.0f    // top left
     };
     GLuint indices[] = {
         0, 1, 3,
         1, 2, 3
     };
 
+    
     glGenVertexArrays(1, &VAO);
+  
     glGenBuffers(1, &VBO);
+    
     glGenBuffers(1, &EBO);
-
     char* image_path = "assets/container.jpg";
     char* image_path2 = "assets/awesomeface.png";
 
@@ -331,18 +333,15 @@ int main(void) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3* sizeof(float)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3* sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6* sizeof(float)));
-    glEnableVertexAttribArray(2);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-
     glUseProgram(program);
     glUniform1i(glGetUniformLocation(program, "texture1"), 0);
     glUniform1i(glGetUniformLocation(program, "texture2"), 1);
@@ -355,21 +354,35 @@ int main(void) {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        mat4 trans = GLM_MAT4_IDENTITY_INIT;
-        glm_rotate(trans, (float)glfwGetTime(), (vec3){0.0, 0.0, 1.0});
-        glm_translate(trans, (vec3){0.5f, -0.5f, 0.0f});
-
-        printf("%f", trans[1][3]);
-        
-        glUniformMatrix4fv(glGetUniformLocation(program, "transform"), 1, GL_FALSE, (float *)trans);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
 
-        glUseProgram(program);
+
+        mat4 trans = GLM_MAT4_IDENTITY_INIT; 
+        glm_translate(trans, (vec3){0.5f, -0.5f, 0.0f});
+        glm_rotate(trans, (float)glfwGetTime(), (vec3){0.0, 0.0, 1.0});
+
+        
+        glUniformMatrix4fv(glGetUniformLocation(program, "transform"), 1, GL_FALSE, (float *)trans);
+    
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,0);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        
+        mat4 trans2 = GLM_MAT4_IDENTITY_INIT;
+
+        glm_translate(trans2, (vec3){-0.5f, 0.5f, 0.0f});
+
+        float scale_amount = (float)(sin(glfwGetTime()));
+
+        glm_scale(trans2, (vec3){scale_amount, scale_amount, scale_amount});
+
+        glUniformMatrix4fv(glGetUniformLocation(program, "transform"), 1, GL_FALSE, &trans2[0][0]);
+        
+
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
 
         // Check and call events and swap the buffers
         glfwSwapBuffers(window);

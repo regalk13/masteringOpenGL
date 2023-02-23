@@ -24,10 +24,10 @@
 int file_size(FILE *file, size_t *size) {
     long saved = ftell(file);
     if (saved < 0) return -1;
-   
+
     if (fseek(file, 0, SEEK_END) < 0) return-1;
     long result = ftell(file);
-    if (result < 0) return -1;  
+    if (result < 0) return -1;
     if (fseek(file, saved, SEEK_SET) < 0) return -1;
 
     *size = (size_t) result;
@@ -38,19 +38,19 @@ int file_size(FILE *file, size_t *size) {
 char *slurp_file_into_malloced_cstr(const char *file_path) {
     // Defining variables
     FILE *f = NULL;
-    
+
     char *buffer;
-    
+
     f = fopen(file_path, "r");
 
 
     if (f == NULL) {
         return NULL;
     }
-    
-    size_t size; 
+
+    size_t size;
     file_size(f, &size);
-     
+
     // Check for empty files
     if (size == 0) {
         int saved_errno = errno;
@@ -60,16 +60,16 @@ char *slurp_file_into_malloced_cstr(const char *file_path) {
         return NULL;
     }
 
-    if (fseek(f, 0, SEEK_END) < 0) { 
+    if (fseek(f, 0, SEEK_END) < 0) {
         int saved_errno = errno;
         fclose(f);
         errno = saved_errno;
         return NULL;
     }
-   
-    // Set memory for the size of the file 
+
+    // Set memory for the size of the file
     buffer = malloc(size + 1);
-    
+
     if (buffer == NULL) {
 
         int saved_errno = errno;
@@ -79,32 +79,32 @@ char *slurp_file_into_malloced_cstr(const char *file_path) {
         return NULL;
 
     }
- 
-    if (fseek(f, 0, SEEK_SET) < 0) {     
+
+    if (fseek(f, 0, SEEK_SET) < 0) {
         int saved_errno = errno;
         fclose(f);
         errno = saved_errno;
         free(buffer);
         return NULL;
     }
-   
-  
-    // Reading and copying the file in the buffer 
+
+
+    // Reading and copying the file in the buffer
     fread(buffer, 1, size, f);
 
     if (ferror(f)) {
         int saved_errno = errno;
         fclose(f);
-        errno = saved_errno; 
+        errno = saved_errno;
         free(buffer);
         return NULL;
     }
-    
-    // Add \0 to the end of the buffer 
-    buffer[size] = '\0'; 
+
+    // Add \0 to the end of the buffer
+    buffer[size] = '\0';
     fclose(f);
 
-    // Return the buffer 
+    // Return the buffer
     return buffer;
  }
 
@@ -116,7 +116,7 @@ bool compile_shader_source(const GLchar *source, GLenum shader_type, GLuint *sha
 
     GLint compiled = 0;
     glGetShaderiv(*shader, GL_COMPILE_STATUS, &compiled);
-    
+
     if (!compiled) {
         GLchar message[1024];
         GLsizei message_size;
@@ -147,9 +147,9 @@ bool compile_shader_file(const char *file_path, GLenum shader_type, GLuint *shad
 
 // Link the program shader with the shaders specified
 bool link_program(GLuint *shaders, size_t shaders_count,  GLuint *program) {
-    
+
     *program = glCreateProgram();
-    
+
     for (size_t i = 0; i < shaders_count; ++i) {
         glAttachShader(*program, shaders[i]);
     }
@@ -165,7 +165,7 @@ bool link_program(GLuint *shaders, size_t shaders_count,  GLuint *program) {
         glGetProgramInfoLog(*program, sizeof(message), &message_size, message);
         fprintf(stderr, "Program Linking: %.*s\n", message_size, message);
     }
-    
+
     // Clean the shaders from the memory
     for (size_t i = 0; i < shaders_count; ++i) {
         glDeleteShader(shaders[i]);
@@ -198,18 +198,18 @@ bool load_shader_program(const char *vertex_file_path,
 
 
 void load_texture(GLuint *texture, char *image_path) {
-    
+
     int width, height, nrChannels;
 
     unsigned char *data = stbi_load(image_path, &width, &height, &nrChannels, 0);
-    
-    glGenTextures(1, texture);    
+
+    glGenTextures(1, texture);
     glBindTexture(GL_TEXTURE_2D, *texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    
+
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
@@ -221,7 +221,30 @@ void load_texture(GLuint *texture, char *image_path) {
 
     stbi_image_free(data);
 }
+void load_texture_rgba(GLuint *texture, char *image_path) {
 
+    int width, height, nrChannels;
+
+    unsigned char *data = stbi_load(image_path, &width, &height, &nrChannels, 0);
+
+    glGenTextures(1, texture);
+    glBindTexture(GL_TEXTURE_2D, *texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    if (data) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    } else {
+         fprintf(stderr, "ERROR: could not load image %s: %s\n",
+                image_path, strerror(errno));
+        return;
+    }
+
+    stbi_image_free(data);
+}
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
   glViewport(0, 0, width, height);
 }
@@ -231,7 +254,7 @@ void processInput(GLFWwindow* window) {
     glfwSetWindowShouldClose(window, true);
 }
 
-int main(void) { 
+int main(void) {
     if (!glfwInit()) {
         fprintf(stderr, "ERROR: could not initialize GLFW\n");
         exit(1);
@@ -239,25 +262,25 @@ int main(void) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-     
+
     // Testing math library cglm
-   
+
     // Translating a vector with the identity matrix
-    mat4 trans = GLM_MAT4_IDENTITY_INIT; 
+    mat4 trans = GLM_MAT4_IDENTITY_INIT;
     vec4 vector =  {1.0f, 0.0f, 0.0f, 1.0f};
-    
+
     glm_translate(trans, (vec3){1.0f, 1.0f, 0.0f});
     glm_mat4_mulv(trans, vector, vector);
     printf("Vector: %f\n", vector[0]);
 
 
     GLFWwindow * const window = glfwCreateWindow(
-            DEFAULT_SCREEN_WIDTH, 
-            DEFAULT_SCREEN_HEIGHT, 
-            "Color vertex", 
-            NULL, 
+            DEFAULT_SCREEN_WIDTH,
+            DEFAULT_SCREEN_HEIGHT,
+            "Color vertex",
+            NULL,
             NULL);
-    
+
     if (window == NULL) {
         fprintf(stderr, "ERROR: the window could not be created");
         glfwTerminate();
@@ -273,9 +296,9 @@ int main(void) {
     }
     printf("Opengl used in this platform (%s): \n", glGetString(GL_VERSION));
     glViewport(0, 0 , DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
-    
-    const char *vertex_file_path = "shaders/vertex.vert";
-    const char *fragment_file_path = "shaders/color.frag";
+
+    const char *vertex_file_path = "shaders/texture-unit/vertex.vert";
+    const char *fragment_file_path = "shaders/texture-unit/color.frag";
     GLuint program;
 
     if (!load_shader_program(vertex_file_path, fragment_file_path, &program)) {
@@ -283,34 +306,58 @@ int main(void) {
     }
 
     glUseProgram(program);
-     
-    unsigned int VAO, VBO;
+
+    GLuint VAO, VBO, EBO, texture, texture2;
 
     float vertices[] = {
-    -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-     0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-     0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
-    }; 
+        // positions          // colors           // texture coords
+        0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+        0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
+    };
+    GLuint indices[] = {
+        0, 1, 3,
+        1, 2, 3
+    };
+
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    char* image_path = "assets/container.jpg";
+    char* image_path2 = "assets/awesomeface.png";
+
+
+    load_texture(&texture, image_path);
+    stbi_set_flip_vertically_on_load(true);
+    load_texture_rgba(&texture2, image_path2);
 
     glBindVertexArray(VAO);
 
-    
+
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
- 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3* sizeof(float)));
     glEnableVertexAttribArray(1);
 
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6* sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-    
+
+    glUseProgram(program);
+    glUniform1i(glGetUniformLocation(program, "texture1"), 0);
+    glUniform1i(glGetUniformLocation(program, "texture2"), 1);
+
     while(!glfwWindowShouldClose(window)) {
         // input commands
         processInput(window);
@@ -319,9 +366,14 @@ int main(void) {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture2);
+
         glUseProgram(program);
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,0);
 
         // Check and call events and swap the buffers
         glfwSwapBuffers(window);
@@ -332,7 +384,7 @@ int main(void) {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteProgram(program);
-    
+
     glfwTerminate();
     return 0;
 }

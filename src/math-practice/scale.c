@@ -263,13 +263,6 @@ int main(void) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
-    // Testing math library cglm
-
-    // Translating a vector with the identity matrix
-    mat4 trans = GLM_MAT4_IDENTITY_INIT;
-    glm_rotate(trans, 1.5708f, (vec3){0.0, 0.0, 1.0});
-    glm_scale(trans, (vec3){0.5, 0.5, 0.5});
-
     GLFWwindow * const window = glfwCreateWindow(
             DEFAULT_SCREEN_WIDTH,
             DEFAULT_SCREEN_HEIGHT,
@@ -353,7 +346,12 @@ int main(void) {
     glUseProgram(program);
     glUniform1i(glGetUniformLocation(program, "texture1"), 0);
     glUniform1i(glGetUniformLocation(program, "texture2"), 1);
-    glUniformMatrix4fv(glGetUniformLocation(program, "transform"), 1, GL_FALSE, (float *)trans);
+
+    // Translating a vector with the identity matrix
+
+    mat4 trans = GLM_MAT4_IDENTITY_INIT;
+    glm_scale(trans, (vec3){0.5, 0.5, 0.5});
+
     while(!glfwWindowShouldClose(window)) {
         // input commands
         processInput(window);
@@ -362,6 +360,10 @@ int main(void) {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        mat4 trans = GLM_MAT4_IDENTITY_INIT;
+        glm_rotate(trans, (float)glfwGetTime(), (vec3){0.0, 0.0, 1.0});
+
+        glUniformMatrix4fv(glGetUniformLocation(program, "transform"), 1, GL_FALSE, (float *)trans);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
         glActiveTexture(GL_TEXTURE1);
